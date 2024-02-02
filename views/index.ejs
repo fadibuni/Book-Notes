@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Book Reviews</title>
+    <link rel="stylesheet" href="./styles/main.css" />
+  </head>
+  <body>
+    <form action="/add" method="post">
+      <label for="isbn">ISBN:</label>
+      <input type="text" id="isbn" name="isbn" required />
+      <label for="date_read">Date Read:</label>
+      <input type="date" id="date_read" name="date_read" required />
+      <label for="rating">Rating (1-10):</label>
+      <input
+        type="number"
+        id="rating"
+        name="rating"
+        min="1"
+        max="10"
+        required
+      />
+      <label for="notes">Notes:</label>
+      <textarea id="notes" name="notes"></textarea>
+      <button type="submit">Add Book Review</button>
+    </form>
+
+    <h1>My Book Reviews</h1>
+    <% if (!(locals.books && locals.books.length > 0)) { %>
+    <div id="message-container">
+      <p>No books to display</p>
+    </div>
+    <% } else { %>
+    <div id="book-container">
+      <% books.forEach(book => { %>
+      <div class="book">
+        <img
+          src="<%= book.url %>"
+          alt="Cover image for <%= book.title %>"
+          onerror="this.onerror=null;this.src='cdn.pixabay.com/photo/2015/06/09/16/12/error-803716_1280.png';"
+        />
+        <h2><%= book.title %></h2>
+        <p>Author: <%= book.author %></p>
+        <p>Rating: <%= book.rating %></p>
+        <p>Date Read: <%= new Date(book.date_read).toDateString() %></p>
+        <p>Notes: <%= book.notes %></p>
+        <div class="book-actions">
+          <button
+            id="edit"
+            onclick="openEditModal('<%= book.isbn %>', '<%= book.rating %>', '<%= book.date_read %>', '<%= book.notes %>')"
+          >
+            EDIT
+          </button>
+
+          <a id="delete" href="/delete/<%= book.isbn %>">Delete</a>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+    <% } %>
+    <!-- Modal Dialog for Editing -->
+    <div id="editModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <form id="editForm">
+          <label for="editRating">Rating (1-10):</label>
+          <input
+            type="number"
+            id="editRating"
+            name="rating"
+            min="1"
+            max="10"
+            required
+          />
+          <label for="editDateRead">Date Read:</label>
+          <input type="date" id="editDateRead" name="date_read" required />
+          <label for="editNotes">Notes:</label>
+          <textarea id="editNotes" name="notes"></textarea>
+          <input type="hidden" id="editIsbn" name="isbn" />
+          <button type="submit">Update Book Review</button>
+        </form>
+      </div>
+    </div>
+    <script>
+      function openEditModal(isbn, rating, dateRead, notes) {
+        document.getElementById("editRating").value = rating;
+        document.getElementById("editDateRead").value = dateRead;
+        document.getElementById("editNotes").value = notes;
+        document.getElementById("editIsbn").value = isbn;
+
+
+        var form = document.getElementById("editForm");
+        form.action = `/update/${isbn}`;
+        form.method = "post";
+
+
+        document.getElementById("editModal").style.display = "block";
+        document.body.classList.add("no-scroll");
+      }
+      document.getElementsByClassName("close")[0].onclick = function () {
+        document.getElementById("editModal").style.display = "none";
+        document.body.classList.remove("no-scroll");
+      };
+      window.onclick = function (event) {
+        var modal = document.getElementById("editModal");
+        if (event.target == modal) {
+          modal.style.display = "none";
+          document.body.classList.remove("no-scroll");
+        }
+      };
+    </script>
+  </body>
+</html>
